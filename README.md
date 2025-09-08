@@ -144,7 +144,7 @@ Modern web browser
 ### **Installation**
 ```bash
 # 1. Clone or download the project
-git clone [repository-url]
+git clone [https://github.com/George-Tharwat-Thabet/MeHelper.git]
 cd MeHelper
 
 # 2. Create virtual environment (recommended)

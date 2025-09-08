@@ -158,7 +158,6 @@ pip install -r requirements.txt
 # 4. Configure environment variables
 # Create .env file in project root:
 echo "FLASK_ENV=development" > .env
-echo "OPENAI_API_KEY=your_openai_key_here" >> .env
 echo "HF_TOKEN=your_huggingface_token_here" >> .env
 echo "GEMINI_API_KEY=your_gemini_key_here" >> .env
 ```

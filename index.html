@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MeHelper - Primary care triage & first-aid advisor for remote areas">
+    <title>MeHelper - Primary Care, Anywhere</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="medical-icon-container">
+                <div class="medical-icon">
+                    <div class="icon-inner">
+                        <span class="medical-symbol">🩺</span>
+                    </div>
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring pulse-ring-2"></div>
+                    <div class="pulse-ring pulse-ring-3"></div>
+                </div>
+            </div>
+            <div class="splash-text">
+                <h1 class="splash-title">MeHelper</h1>
+                <p class="splash-subtitle">Primary Care, Anywhere</p>
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        <div class="splash-background">
+            <div class="bg-particle"></div>
+            <div class="bg-particle"></div>
+            <div class="bg-particle"></div>
+            <div class="bg-particle"></div>
+            <div class="bg-particle"></div>
+        </div>
+    </div>
+    
+    <!-- Main App Content -->
+    <div id="main-app" class="main-app hidden">
+    <!-- Navbar for previous scans -->
+    <div id="navbar" class="navbar">
+        <div class="navbar-header">
+            <h3 data-i18n="history-title">Previous Scans</h3>
+            <button id="close-navbar" class="close-btn">&times;</button>
+        </div>
+        <div class="navbar-content">
+            <div id="history-list" class="history-list"></div>
+            <p id="no-history-text" class="no-history" data-i18n="no-history-text">No previous scans found.</p>
+        </div>
+        
+        <!-- Fixed Resources Button -->
+        <div class="navbar-resources">
+            <button id="resources-btn" class="btn btn-primary resources-btn" data-i18n="resources-title">First Aid Resources</button>
+        </div>
+    </div>
+    
+    <!-- Resources Dialog -->
+    <div id="resources-dialog" class="dialog">
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h3 data-i18n="resources-title">First Aid Resources</h3>
+                <button id="close-dialog" class="close-btn">&times;</button>
+            </div>
+            <div class="dialog-body">
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="dehydration-header">
+                            <h3 id="dehydration-title">Dehydration</h3>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content">
+                            <ul id="dehydration-list">
+                                <li>Drink small amounts of water frequently</li>
+                                <li>Try oral rehydration solutions if available</li>
+                                <li>Avoid caffeine and alcohol</li>
+                                <li>Rest in a cool place</li>
+                                <li>Seek medical help if symptoms persist for more than 24 hours</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="fever-header">
+                            <h3 id="fever-title">Fever</h3>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content">
+                            <ul id="fever-list">
+                                <li>Rest and stay hydrated</li>
+                                <li>Take acetaminophen/paracetamol if available</li>
+                                <li>Use a cool compress on forehead</li>
+                                <li>Wear lightweight clothing</li>
+                                <li>Seek medical help if fever is above 39°C (102.2°F) or lasts more than 3 days</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="wound-care-header">
+                            <h3 id="wound-care-title">Wound Care</h3>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content">
+                            <ul id="wound-care-list">
+                                <li>Clean the wound with clean water</li>
+                                <li>Apply gentle pressure to stop bleeding</li>
+                                <li>Apply antiseptic if available</li>
+                                <li>Cover with a clean bandage</li>
+                                <li>Change dressing daily</li>
+                                <li>Seek medical help for deep wounds, animal bites, or signs of infection</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="chest-pain-header">
+                            <h3 id="chest-pain-title">Chest Pain</h3>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content">
+                            <ul id="chest-pain-list">
+                                <li>Stop any activity and rest in a comfortable position</li>
+                                <li>Loosen tight clothing</li>
+                                <li>If available and prescribed, take nitroglycerin</li>
+                                <li>If pain persists more than a few minutes, seek emergency help immediately</li>
+                                <li>If the person is unconscious, check breathing and pulse, and begin CPR if needed</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <div class="accordion-header" id="breathing-header">
+                            <h3 id="breathing-title">Breathing Difficulty</h3>
+                            <span class="accordion-icon">+</span>
+                        </div>
+                        <div class="accordion-content">
+                            <ul id="breathing-list">
+                                <li>Help the person into a comfortable position (usually sitting upright)</li>
+                                <li>Loosen any tight clothing</li>
+                                <li>If the person has asthma medication, help them use it</li>
+                                <li>Encourage slow, deep breathing</li>
+                                <li>If symptoms are severe or worsen, seek emergency help immediately</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="overlay" class="overlay"></div>
+
+    <header class="header">
+        <div class="container header-container">
+            <div class="logo-container">
+                <button class="menu-icon" id="menu-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h1 class="logo">MeHelper</h1>
+            </div>
+            <div class="actions">
+                <button class="btn btn-location" id="send-location-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Send My Location
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="hero">
+            <div class="container">
+                <h1 id="hero-title">Primary Care, Anywhere.</h1>
+                <p id="hero-subtitle">Describe your symptoms and get first-aid guidance instantly. Not a substitute for a doctor.</p>
+                <p class="hero-human-element">Bridging healthcare gaps in remote villages, isolated communities, and areas where the nearest clinic may be hours away. When professional medical help isn't immediately accessible, informed guidance can make all the difference.</p>
+                <button class="btn btn-primary" id="start-triage-btn">Start Triage</button>
+            </div>
+        </section>
+
+        <section class="triage" id="triage">
+            <div class="container">
+                <div class="card triage-card">
+                    <h2 id="triage-title">Symptom Triage</h2>
+                    <form id="triage-form">
+                        <div class="form-group">
+                            <label for="age" id="age-label">Age</label>
+                            <input type="number" id="age" class="input" min="0" max="120" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sex" id="sex-label">Sex</label>
+                            <select id="sex" class="input" required>
+                                <option value="" disabled selected id="sex-placeholder">Select</option>
+                                <option value="male" id="sex-male">Male</option>
+                                <option value="female" id="sex-female">Female</option>
+                                <option value="other" id="sex-other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label id="symptoms-label">Symptoms</label>
+                            <div class="chips-container" id="symptoms-chips">
+                                <div class="chip" data-value="fever" id="chip-fever">Fever</div>
+                                <div class="chip" data-value="headache" id="chip-headache">Headache</div>
+                                <div class="chip" data-value="cough" id="chip-cough">Cough</div>
+                                <div class="chip" data-value="sore-throat" id="chip-sore-throat">Sore Throat</div>
+                                <div class="chip" data-value="nausea" id="chip-nausea">Nausea</div>
+                                <div class="chip" data-value="diarrhea" id="chip-diarrhea">Diarrhea</div>
+                                <div class="chip" data-value="rash" id="chip-rash">Rash</div>
+                                <div class="chip" data-value="pain" id="chip-pain">Pain</div>
+                                <div class="chip" data-value="anxiety" id="chip-anxiety">Anxiety</div>
+                                <div class="chip" data-value="stress" id="chip-stress">Stress</div>
+                                <div class="chip" data-value="depression" id="chip-depression">Depression</div>
+                                <div class="chip" data-value="other" id="chip-other">Other</div>
+                            </div>
+                            <textarea id="symptoms-text" class="input" placeholder="Describe your symptoms in detail..." rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duration" id="duration-label">Duration</label>
+                            <select id="duration" class="input" required>
+                                <option value="" disabled selected id="duration-placeholder">Select</option>
+                                <option value="hours" id="duration-hours">Hours</option>
+                                <option value="1-2days" id="duration-1-2days">1-2 days</option>
+                                <option value="3-7days" id="duration-3-7days">3-7 days</option>
+                                <option value="1-2weeks" id="duration-1-2weeks">1-2 weeks</option>
+                                <option value="more" id="duration-more">More than 2 weeks</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label id="vitals-label">Vitals (Optional)</label>
+                            <div class="vitals-container">
+                                <div class="vital-input">
+                                    <label for="temperature" id="temperature-label">Temperature (°C)</label>
+                                    <input type="number" id="temperature" class="input" min="35" max="43" step="0.1">
+                                </div>
+                                <div class="vital-input">
+                                    <label for="heart-rate" id="heart-rate-label">Heart Rate (BPM)</label>
+                                    <input type="number" id="heart-rate" class="input" min="40" max="220">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" id="image-upload-container">
+                            <label id="image-label">Image Upload (Optional)</label>
+                            <div class="image-upload">
+                                <input type="file" id="image-input" accept="image/*" class="input">
+                                <div id="image-preview" class="image-preview"></div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" id="analyze-btn">Analyze</button>
+                    </form>
+                </div>
+                
+                <div class="card result-card hidden" id="result-card">
+                    <div class="result-header">
+                        <button class="btn btn-primary new-scan-btn" id="new-scan-btn">New Scan</button>
+                        <h3 id="result-title">Triage Result</h3>
+                        <div class="badge" id="risk-badge"></div>
+                    </div>
+                    
+                    <div class="triage-levels-container">
+                        <!-- Level 1: Reassurance Level -->
+                        <div class="triage-level" id="level-1-reassurance">
+                            <div class="level-header">
+                                <h4>1. Reassurance Level</h4>
+                                <div class="level-header-actions">
+                                    <button class="audio-btn" data-level="1" title="Read aloud">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 3v18l-5-5H3V8h4l5-5zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 2.53-1.5 4.71-3.66 5.75l-.67-1.11c1.66-.78 2.83-2.5 2.83-4.64s-1.17-3.86-2.83-4.64l.67-1.11C17.5 7.29 19 9.47 19 12z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="level-badge level-mild">Mild Symptoms</span>
+                                </div>
+                            </div>
+                            <div class="level-content">
+                                <p id="reassurance-message">These symptoms are usually mild and not worrisome. Rest, drink plenty of water, and if they persist or worsen, see a doctor.</p>
+                            </div>
+                        </div>
+
+                        <!-- Level 2: Initial Assessment -->
+                        <div class="triage-level" id="level-2-assessment">
+                            <div class="level-header">
+                                <h4>2. Initial Assessment</h4>
+                                <div class="level-header-actions">
+                                    <button class="audio-btn" data-level="2" title="Read aloud">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 3v18l-5-5H3V8h4l5-5zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 2.53-1.5 4.71-3.66 5.75l-.67-1.11c1.66-.78 2.83-2.5 2.83-4.64s-1.17-3.86-2.83-4.64l.67-1.11C17.5 7.29 19 9.47 19 12z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="level-badge" id="assessment-badge">Assessment Level</span>
+                                </div>
+                            </div>
+                            <div class="level-content">
+                                <p id="assessment-text">Your condition has been classified as <strong id="condition-severity">mild</strong>.</p>
+                            </div>
+                        </div>
+
+                        <!-- Level 3: Pathological Possibilities -->
+                        <div class="triage-level" id="level-3-possibilities">
+                            <div class="level-header">
+                                <h4>3. Most Likely Pathological Possibilities</h4>
+                                <div class="level-header-actions">
+                                    <button class="audio-btn" data-level="3" title="Read aloud">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 3v18l-5-5H3V8h4l5-5zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 2.53-1.5 4.71-3.66 5.75l-.67-1.11c1.66-.78 2.83-2.5 2.83-4.64s-1.17-3.86-2.83-4.64l.67-1.11C17.5 7.29 19 9.47 19 12z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="level-badge level-info">Possible Causes</span>
+                                </div>
+                            </div>
+                            <div class="level-content">
+                                <ul id="possibilities-list"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Level 4: First Aid Measures -->
+                        <div class="triage-level" id="level-4-first-aid">
+                            <div class="level-header">
+                                <h4>4. First Aid Measures</h4>
+                                <div class="level-header-actions">
+                                    <button class="audio-btn" data-level="4" title="Read aloud">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 3v18l-5-5H3V8h4l5-5zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 2.53-1.5 4.71-3.66 5.75l-.67-1.11c1.66-.78 2.83-2.5 2.83-4.64s-1.17-3.86-2.83-4.64l.67-1.11C17.5 7.29 19 9.47 19 12z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="level-badge level-action">Home Care</span>
+                                </div>
+                            </div>
+                            <div class="level-content">
+                                <ul id="first-aid-list"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Level 5: Danger Signs Alert -->
+                        <div class="triage-level danger-level hidden" id="level-5-danger">
+                            <div class="level-header">
+                                <h4>5. Danger Signs Alert</h4>
+                                <div class="level-header-actions">
+                                    <button class="audio-btn" data-level="5" title="Read aloud">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 3v18l-5-5H3V8h4l5-5zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 2.53-1.5 4.71-3.66 5.75l-.67-1.11c1.66-.78 2.83-2.5 2.83-4.64s-1.17-3.86-2.83-4.64l.67-1.11C17.5 7.29 19 9.47 19 12z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="level-badge level-danger">⚠️ DANGER</span>
+                                </div>
+                            </div>
+                            <div class="level-content">
+                                <div class="alert-box">
+                                    <p id="danger-message">Call an ambulance immediately or go to the nearest hospital if you experience:</p>
+                                    <ul id="danger-signs-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Level 6: Vital Signs Analysis -->
+                        <div class="triage-level" id="level-6-vitals">
+                            <div class="level-header">
+                                <h4>6. Vital Signs Analysis</h4>
+                                <div class="level-header-actions">
+                                    <button class="audio-btn" data-level="6" title="Read aloud">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 3v18l-5-5H3V8h4l5-5zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 2.53-1.5 4.71-3.66 5.75l-.67-1.11c1.66-.78 2.83-2.5 2.83-4.64s-1.17-3.86-2.83-4.64l.67-1.11C17.5 7.29 19 9.47 19 12z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="level-badge level-vitals">Vital Signs</span>
+                                </div>
+                            </div>
+                            <div class="level-content">
+                                <div id="vitals-analysis"></div>
+                            </div>
+                        </div>
+
+                        <!-- Level 7: Summary Report -->
+                        <div class="triage-level" id="level-7-summary">
+                            <div class="level-header">
+                                <h4>7. Summary Report & Next Action</h4>
+                                <span class="level-badge level-summary">Summary</span>
+                            </div>
+                            <div class="level-content">
+                                <div id="summary-report"></div>
+                                <div class="recommendation-box">
+                                    <h5>Recommendation:</h5>
+                                    <p id="next-action-recommendation"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Level 8: AI Image Analysis -->
+                        <div class="triage-level hidden" id="level-8-image-analysis">
+                            <div class="level-header">
+                                <h4>8. 🖼️ AI Image Analysis</h4>
+                                <div class="level-header-actions">
+                                    <button class="audio-btn" data-level="8" title="Read aloud">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 3v18l-5-5H3V8h4l5-5zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM19 12c0 2.53-1.5 4.71-3.66 5.75l-.67-1.11c1.66-.78 2.83-2.5 2.83-4.64s-1.17-3.86-2.83-4.64l.67-1.11C17.5 7.29 19 9.47 19 12z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="level-badge level-ai-vision">AI Vision</span>
+                                </div>
+                            </div>
+                            <div class="level-content">
+                                <div class="image-analysis-box">
+                                    <p><strong>What the AI sees in your image:</strong></p>
+                                    <div id="image-analysis-findings"></div>
+                                    <small class="ai-disclaimer"><em>AI image analysis supplements your symptom description and is not a medical diagnosis.</em></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="disclaimer">
+                        <p id="disclaimer-text">DISCLAIMER: This is not medical advice. In emergencies, contact local emergency services immediately.</p>
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p id="footer-text">MeHelper is an informational tool, not medical advice. In emergencies, contact local services.</p>
+        </div>
+    </footer>
+
+    </div>
+    <!-- End Main App Content -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <script src="js/app.js" defer></script>
+</body>
+</html>
